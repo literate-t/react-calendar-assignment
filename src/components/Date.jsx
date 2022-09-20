@@ -1,6 +1,7 @@
 import dayjs from "dayjs";
 import { useContext, useEffect, useState } from "react";
 import GlobalContext from "../context/GlobalContext";
+import { getColor } from "../util";
 
 const Date = ({ date }) => {
   const [dateEvents, setDateEvents] = useState([]);
@@ -11,15 +12,12 @@ const Date = ({ date }) => {
     setSelectedEvent,
   } = useContext(GlobalContext);
 
-  // console.log(filteredEvents);
-
   useEffect(() => {
     const events = filteredEvents.filter(
       (event) =>
         dayjs(event.date || event.dateTime).format("DD-MM-YY") ===
         date.format("DD-MM-YY")
     );
-
     setDateEvents(events);
   }, [filteredEvents, date]);
 
@@ -50,9 +48,11 @@ const Date = ({ date }) => {
             onClick={() => {
               setSelectedEvent(event);
             }}
-            className={`bg-${event.label} p-1 mr-3 text-white text-sm rounded mb-1 truncate`}
+            className={`bg-${getColor(
+              event.colorId
+            )} p-1 mr-3 text-white text-sm rounded mb-1 truncate`}
           >
-            {event.title}
+            {event.summary}
           </div>
         ))}
       </div>

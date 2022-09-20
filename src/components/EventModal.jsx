@@ -1,25 +1,46 @@
 import { useContext, useState } from "react";
 import GlobalContext from "../context/GlobalContext";
-import { labelColorClasses } from "../util";
-//const labelClasses = ["blue", "indigo", "gray", "green", "red", "purple"];
+import LibraryContext from "../context/LibraryContext";
+import {
+  getColor,
+  getColorId,
+  labelColorClasses,
+  postRequest,
+  setGapiClient,
+} from "../util";
+
+const SCOPES = "https://www.googleapis.com/auth/calendar";
 
 const EventModal = () => {
   const {
     setShowEventModal,
     daySelected,
-    filteredEvents,
     dispatchCalenderEvents,
     selectedEvent,
   } = useContext(GlobalContext);
 
-  const [title, setTitle] = useState(selectedEvent ? selectedEvent.title : "");
+  const { gapi, google } = useContext(LibraryContext);
+
+  setGapiClient(gapi);
+
+  google.accounts.oauth2.initTokenClient({
+    client_id: process.env.REACT_APP_CLIENT_ID,
+    scope: SCOPES,
+    callback: "",
+  });
+
+  const [summary, setSummary] = useState(
+    selectedEvent ? selectedEvent.summary : ""
+  );
+
   const [description, setDescription] = useState(
     selectedEvent ? selectedEvent.description : ""
   );
+
   const [selectedLabel, setSelectedLabel] = useState(
     selectedEvent
       ? labelColorClasses.find(
-          (labelColor) => selectedEvent.label === labelColor
+          (labelColor) => getColor(selectedEvent.colorId) === labelColor
         )
       : labelColorClasses[0]
   );
@@ -27,27 +48,106 @@ const EventModal = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    const format = "YYYY-MM-DD";
-    const event = filteredEvents.find(
-      (event) => (event.date || event.dateTime) === daySelected.format(format)
-    );
-
-    const calendarEvent = {
-      title,
+    const event = {
+      summary,
       description,
-      label: selectedLabel,
-      date: event.date ? event.date : null,
-      dateTime: event.dateTime ? event.dateTime : null,
-      id: selectedEvent && selectedEvent.id,
+      colorId: getColorId(selectedLabel),
+      ...(!selectedEvent
+        ? { date: daySelected.format("YYYY-MM-DD") }
+        : selectedEvent.date
+        ? { date: selectedEvent.date }
+        : { dateTime: selectedEvent.dateTime }),
+      ...(selectedEvent ? { id: selectedEvent.id } : null),
     };
 
     if (selectedEvent) {
-      console.log("a");
-      dispatchCalenderEvents({ type: "update", payload: calendarEvent });
+      gapi.client.calendar.events
+        .patch({
+          calendarId: "primary",
+          eventId: event.id,
+          resource: event,
+        })
+        .execute((result) => {
+          // if (event.code === 400) {
+          //   alert("요청이 잘못됐어요");
+          // } else if (event.code === 401) {
+          //   alert("다시 로그인 해주세요");
+          // } else {
+          //   alert("이벤트 수정이 성공했어요");
+          //   dispatchCalenderEvents({ type: "update", payload: event });
+          // }
+          postRequest(result, () =>
+            dispatchCalenderEvents({ type: "update", payload: event })
+          );
+          console.log("patch", result);
+        });
     } else {
-      console.log("b");
-      dispatchCalenderEvents({ type: "push", payload: calendarEvent });
+      const insertEvent = {
+        ...event,
+        end: {
+          date: daySelected.format("YYYY-MM-DD"),
+        },
+        start: {
+          date: daySelected.format("YYYY-MM-DD"),
+        },
+      };
+
+      gapi.client.calendar.events
+        .insert({
+          calendarId: "primary",
+          resource: insertEvent,
+        })
+        .execute((result) => {
+          // dispatchCalenderEvents({
+          //   type: "push",
+          //   payload: {
+          //     ...insertEvent,
+          //     id: event.id,
+          //   },
+          // });
+          postRequest(result, () => {
+            // const newEvent = {
+            //   ...event
+            // }
+            console.log("insert", event);
+
+            dispatchCalenderEvents({
+              type: "push",
+              payload: {
+                ...event,
+                id: result.id,
+              },
+            });
+          });
+
+          //console.log("insert", result);
+        });
     }
+
+    setShowEventModal(false);
+  };
+
+  const handleDelete = () => {
+    // dispatchCalenderEvents({
+    //   type: "delete",
+    //   payload: selectedEvent,
+    // });
+
+    gapi.client.calendar.events
+      .delete({
+        calendarId: "primary",
+        eventId: selectedEvent.id,
+      })
+      .execute((result) => {
+        postRequest(result, () =>
+          dispatchCalenderEvents({
+            type: "delete",
+            payload: selectedEvent,
+          })
+        );
+
+        console.log("delete", result);
+      });
 
     setShowEventModal(false);
   };
@@ -62,13 +162,7 @@ const EventModal = () => {
           <div>
             {selectedEvent && (
               <span
-                onClick={() => {
-                  dispatchCalenderEvents({
-                    type: "delete",
-                    payload: selectedEvent,
-                  });
-                  setShowEventModal(false);
-                }}
+                onClick={handleDelete}
                 className="material-symbols-rounded text-gray-400 cursor-pointer"
               >
                 delete
@@ -87,11 +181,11 @@ const EventModal = () => {
             <input
               className="pt-3 border-0 text-gray-600 text-xl font-semibold pb-2 w-full border-b-2 border-gray-200 focus:ring-0 focus:border-blue-500"
               type="text"
-              name="title"
+              name="summary"
               placeholder="Add title"
-              value={title}
+              value={summary}
               required
-              onChange={({ target: { value } }) => setTitle(value)}
+              onChange={({ target: { value } }) => setSummary(value)}
             />
             <span className="material-symbols-rounded text-gray-400">
               schedule
@@ -119,6 +213,7 @@ const EventModal = () => {
                   onClick={() => setSelectedLabel(labelClass)}
                   className={`w-6 h-6 bg-${labelClass} rounded-full flex items-center justify-center cursor-pointer`}
                 >
+                  {/* {console.log(selectedLabel, labelClass)} */}
                   {selectedLabel === labelClass && (
                     <span className="material-symbols-rounded text-white text-sm">
                       check

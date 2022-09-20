@@ -1,41 +1,35 @@
-import { useContext, useState } from "react";
-import useScript from "../useScript";
+import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { getColor } from "../util";
+import { getColorId, setGapiClient } from "../util";
 import GlobalContext from "../context/GlobalContext";
+import LibraryContext from "../context/LibraryContext";
 
-const API_KEY = process.env.REACT_APP_API_KEY;
-const CLIENT_ID = process.env.REACT_APP_CLIENT_ID;
-const DISCOVERY_DOC =
-  "https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest";
 const SCOPES = "https://www.googleapis.com/auth/calendar";
 
 const Auth = () => {
-  const [apiLoading, apiError] = useScript("https://apis.google.com/js/api.js");
-  const [gsiLoading, gsiError] = useScript(
-    "https://accounts.google.com/gsi/client"
-  );
+  // const [apiLoading, apiError] = useScript("https://apis.google.com/js/api.js");
+  // const [gsiLoading, gsiError] = useScript(
+  //   "https://accounts.google.com/gsi/client"
+  // );
 
   const navigate = useNavigate();
 
   const { dispatchCalenderEvents } = useContext(GlobalContext);
+  const { gapi, google } = useContext(LibraryContext);
 
-  if (apiLoading || gsiLoading) return <p>loading</p>;
-  if (apiError || gsiError) return <p>error</p>;
+  // const intializeGapiClient = async () => {
+  //   await gapi.client.init({
+  //     apiKey: process.env.REACT_APP_API_KEY,
+  //     discoveryDocs: [process.env.REACT_APP_DISCOVERY_DOC],
+  //   });
+  // };
 
-  const { gapi, google } = window;
+  setGapiClient(gapi);
 
-  const intializeGapiClient = async () => {
-    await gapi.client.init({
-      apiKey: API_KEY,
-      discoveryDocs: [DISCOVERY_DOC],
-    });
-  };
-
-  gapi.load("client", intializeGapiClient);
+  // gapi.load("client", () => intializeGapiClient(gapi));
 
   const tokenClient = google.accounts.oauth2.initTokenClient({
-    client_id: CLIENT_ID,
+    client_id: process.env.REACT_APP_CLIENT_ID,
     scope: SCOPES,
     callback: async (resp) => {
       if (resp.error !== undefined) {
@@ -46,8 +40,6 @@ const Auth = () => {
   });
 
   const handleAuth = () => {
-    // console.log({ gapi, google });
-
     if (gapi.client.getToken() === null) {
       // 이 과정에서 tokenClient의 callback 함수가 호출됨
       tokenClient.requestAccessToken({ prompt: "consent" });
@@ -68,25 +60,21 @@ const Auth = () => {
         orderBy: "startTime",
       };
       response = await gapi.client.calendar.events.list(request);
-      //   const eventColor = await gapi.client.calendar.events.get({
-      //     calendarId: "primary",
-      //     eventId: "2rmomadl6m2lknel47t5bqi85p",
-      //   });
-      //console.log(eventColor);
     } catch (err) {
-      //   setOutput(err.message);
+      console.err(err);
+
       return;
     }
+
     const events = response.result.items.map((item) => ({
-      title: item.summary,
+      summary: item.summary,
       description: item.description ? item.description : "",
-      label: item.colorId ? getColor(item.colorId) : "peacock",
-      date: item.start.date ? item.start.date : null,
-      dateTime: item.start.dateTime ? item.start.dateTime : null,
+      colorId: item.colorId ? item.colorId : getColorId(),
+      ...(item.start.date
+        ? { date: item.start.date }
+        : { dateTime: item.start.dateTime }),
       id: item.id,
     }));
-
-    console.log("Auth", events);
 
     dispatchCalenderEvents({ type: "init", payload: events });
 

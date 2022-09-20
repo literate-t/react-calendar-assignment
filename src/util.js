@@ -28,19 +28,6 @@ export const getWeek = (date = dayjs().date()) => {
 
   return week;
 };
-/*
-      1. #a4bdfc: 라벤더
-      2. #7ae7bf: 세이지
-      3. #dbadff: 포도
-      4. #ff887c: 연분홍
-      5. #fbd75b: 바나나
-      6. #ffb878: 귤
-      7. #46d6db: 공작 (default)
-      8. #e1e1e1: 흑연
-      9. #5484ed: 블루베리
-     10. #51b749: 바질
-     11. #dc2127: 토마토
-*/
 
 const labelColorPalette = {
   1: "lavender",
@@ -57,7 +44,7 @@ const labelColorPalette = {
 };
 export const getColor = (colorId) => labelColorPalette[colorId];
 
-export const getColorId = (color) =>
+export const getColorId = (color = "peacock") =>
   Object.keys(labelColorPalette).find(
     (key) => labelColorPalette[key] === color
   );
@@ -75,3 +62,25 @@ export const labelColorClasses = [
   "basil",
   "tomato",
 ];
+
+const intializeGapiClient = async (gadpi) => {
+  await gadpi.client.init({
+    apiKey: process.env.REACT_APP_API_KEY,
+    discoveryDocs: [process.env.REACT_APP_DISCOVERY_DOC],
+  });
+};
+
+export const setGapiClient = (gapi) => {
+  gapi.load("client", async () => intializeGapiClient(gapi));
+};
+
+export const postRequest = (event, fn) => {
+  if (event.code === 400) {
+    alert("요청이 잘못됐어요");
+  } else if (event.code === 401) {
+    alert("다시 로그인 해주세요");
+  } else {
+    alert("요청이 성공했어요");
+    fn();
+  }
+};

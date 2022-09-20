@@ -5,14 +5,17 @@ import "./index.css";
 import reportWebVitals from "./reportWebVitals";
 import ContextWrapper from "./context/ContextWrapper";
 import Router from "./Router";
+import LibraryWrapper from "./context/LibraryWrapper";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
     <BrowserRouter>
-      <ContextWrapper>
-        <Router />
-      </ContextWrapper>
+      <LibraryWrapper>
+        <ContextWrapper>
+          <Router />
+        </ContextWrapper>
+      </LibraryWrapper>
     </BrowserRouter>
   </React.StrictMode>
 );

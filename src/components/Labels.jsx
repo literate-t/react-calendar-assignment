@@ -1,31 +1,26 @@
 import { useContext } from "react";
 import GlobalContext from "../context/GlobalContext";
-
-// const getTextColor = (label) => {
-//   const color = label.substring(3, label.length - 4);
-//   const result = `text-${color}-400`;
-//   console.log(result);
-
-//   return result;
-// };
-
-// const getColorText = (label) => label.substring(3, label.length - 4);
+import { getColor } from "../util";
 
 const Labels = () => {
   const { labels, updateLabel } = useContext(GlobalContext);
 
   return (
     <>
-      <p className="text-gray-500 font-bold mt-10">Label</p>
-      {labels.map(({ label, checked }, index) => (
+      <p className="text-gray-500 mt-8 font-bold">Label</p>
+      {labels.map(({ colorId, checked }, index) => (
         <label className="items-center mt-3 block" key={index}>
           <input
             type="checkbox"
             checked={checked}
-            onChange={() => updateLabel({ label, checked: !checked })}
-            className={`form-checkbox h-5 w-5 text-${label} rounded focus:ring-0 cursor-pointer`}
+            onChange={() => updateLabel({ colorId, checked: !checked })}
+            className={`form-checkbox h-5 w-5 text-${getColor(
+              colorId
+            )} rounded focus:ring-0 cursor-pointer`}
           />
-          <span className="ml-2 text-gray-700 capitalize">{label}</span>
+          <span className="ml-2 text-gray-700 capitalize">
+            {getColor(colorId)}
+          </span>
         </label>
       ))}
     </>
