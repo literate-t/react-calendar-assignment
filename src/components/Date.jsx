@@ -11,9 +11,12 @@ const Date = ({ date }) => {
     setSelectedEvent,
   } = useContext(GlobalContext);
 
+  console.log(filteredEvents);
+
   useEffect(() => {
     const events = filteredEvents.filter(
-      (event) => dayjs(event.day).format("DD-MM-YY") === date.format("DD-MM-YY")
+      (event) =>
+        dayjs(event.date).format("DD-MM-YY") === date.format("DD-MM-YY")
     );
 
     setDateEvents(events);
@@ -38,7 +41,6 @@ const Date = ({ date }) => {
         onClick={() => {
           setDaySelected(date);
           setShowEventModal(true);
-          console.log("b");
         }}
       >
         {dateEvents.map((event, index) => (
@@ -46,9 +48,8 @@ const Date = ({ date }) => {
             key={index}
             onClick={() => {
               setSelectedEvent(event);
-              console.log("a");
             }}
-            className={`bg-${event.label}-400 p-1 mr-3 text-white text-sm rounded mb-1 truncate`}
+            className={`bg-${event.label} p-1 mr-3 text-white text-sm rounded mb-1 truncate`}
           >
             {event.title}
           </div>

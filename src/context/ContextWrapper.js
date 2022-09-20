@@ -4,6 +4,8 @@ import GlobalContext from "./GlobalContext";
 
 const savedEventsReducer = (state, { type, payload }) => {
   switch (type) {
+    case "init":
+      return [...payload];
     case "push":
       return [...state, payload];
     case "update":
@@ -15,12 +17,12 @@ const savedEventsReducer = (state, { type, payload }) => {
   }
 };
 
-const initEvents = () => {
-  const storageEvents = localStorage.getItem("savedEvents");
-  const parsedEvents = storageEvents ? JSON.parse(storageEvents) : [];
-
-  return parsedEvents;
-};
+// const initEvents = () => {
+//   const storageEvents = localStorage.getItem("savedEvents");
+//   const parsedEvents = storageEvents ? JSON.parse(storageEvents) : [];
+//   // console.log("initEvents");
+//   return parsedEvents;
+// };
 
 const ContextWrapper = ({ children }) => {
   const [monthIndex, setMonthIndex] = useState(dayjs().month());
@@ -32,8 +34,8 @@ const ContextWrapper = ({ children }) => {
   const [labels, setLabels] = useState([]);
   const [savedEvents, dispatchCalenderEvents] = useReducer(
     savedEventsReducer,
-    [],
-    initEvents
+    []
+    // initEvents
   );
 
   const filteredEvents = useMemo(() => {

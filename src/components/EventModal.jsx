@@ -1,7 +1,7 @@
 import { useContext, useState } from "react";
 import GlobalContext from "../context/GlobalContext";
-
-const labelClasses = ["blue", "indigo", "gray", "green", "red", "purple"];
+import { labelColorClasses } from "../util";
+//const labelClasses = ["blue", "indigo", "gray", "green", "red", "purple"];
 
 const EventModal = () => {
   const {
@@ -17,8 +17,8 @@ const EventModal = () => {
   );
   const [selectedLabel, setSelectedLabel] = useState(
     selectedEvent
-      ? labelClasses.find((label) => selectedEvent.label === label)
-      : labelClasses[0]
+      ? labelColorClasses.find((label) => selectedEvent.label === label)
+      : labelColorClasses[0]
   );
 
   const handleSubmit = (e) => {
@@ -102,11 +102,11 @@ const EventModal = () => {
               bookmarks
             </span>
             <div className="flex gap-x-2">
-              {labelClasses.map((labelClass, index) => (
+              {labelColorClasses.map((labelClass, index) => (
                 <span
                   key={index}
                   onClick={() => setSelectedLabel(labelClass)}
-                  className={`w-6 h-6 bg-${labelClass}-500 rounded-full flex items-center justify-center cursor-pointer`}
+                  className={`w-6 h-6 bg-${labelClass} rounded-full flex items-center justify-center cursor-pointer`}
                 >
                   {selectedLabel === labelClass && (
                     <span className="material-symbols-rounded text-white text-sm">
