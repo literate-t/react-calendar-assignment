@@ -4,9 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { getColor } from "../util";
 import GlobalContext from "../context/GlobalContext";
 
-const API_KEY = "AIzaSyCwIr8gPqmZdCw7r5f7MWZMaPkHW3PtQJk";
-const CLIENT_ID =
-  "521668391210-om44rsvbscur2fa4qnnkcu6hpld037og.apps.googleusercontent.com";
+const API_KEY = process.env.REACT_APP_API_KEY;
+const CLIENT_ID = process.env.REACT_APP_CLIENT_ID;
 const DISCOVERY_DOC =
   "https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest";
 const SCOPES = "https://www.googleapis.com/auth/calendar";
