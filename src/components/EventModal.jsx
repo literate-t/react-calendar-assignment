@@ -7,6 +7,7 @@ const EventModal = () => {
   const {
     setShowEventModal,
     daySelected,
+    filteredEvents,
     dispatchCalenderEvents,
     selectedEvent,
   } = useContext(GlobalContext);
@@ -17,24 +18,34 @@ const EventModal = () => {
   );
   const [selectedLabel, setSelectedLabel] = useState(
     selectedEvent
-      ? labelColorClasses.find((label) => selectedEvent.label === label)
+      ? labelColorClasses.find(
+          (labelColor) => selectedEvent.label === labelColor
+        )
       : labelColorClasses[0]
   );
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
+    const format = "YYYY-MM-DD";
+    const event = filteredEvents.find(
+      (event) => (event.date || event.dateTime) === daySelected.format(format)
+    );
+
     const calendarEvent = {
       title,
       description,
       label: selectedLabel,
-      day: daySelected.valueOf(),
-      id: selectedEvent ? selectedEvent.id : Date.now(),
+      date: event.date ? event.date : null,
+      dateTime: event.dateTime ? event.dateTime : null,
+      id: selectedEvent && selectedEvent.id,
     };
 
     if (selectedEvent) {
+      console.log("a");
       dispatchCalenderEvents({ type: "update", payload: calendarEvent });
     } else {
+      console.log("b");
       dispatchCalenderEvents({ type: "push", payload: calendarEvent });
     }
 

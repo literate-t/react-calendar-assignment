@@ -16,8 +16,6 @@ const Auth = () => {
     "https://accounts.google.com/gsi/client"
   );
 
-  //   const [output, setOutput] = useState();
-
   const navigate = useNavigate();
 
   const { dispatchCalenderEvents } = useContext(GlobalContext);
@@ -83,10 +81,15 @@ const Auth = () => {
       title: item.summary,
       description: item.description ? item.description : "",
       label: item.colorId ? getColor(item.colorId) : "peacock",
-      date: item.start.dateTime || item.start.date,
+      date: item.start.date ? item.start.date : null,
+      dateTime: item.start.dateTime ? item.start.dateTime : null,
       id: item.id,
     }));
+
+    console.log("Auth", events);
+
     dispatchCalenderEvents({ type: "init", payload: events });
+
     navigate("/calendar");
 
     // navigate("/calendar", { state: events });

@@ -11,12 +11,13 @@ const Date = ({ date }) => {
     setSelectedEvent,
   } = useContext(GlobalContext);
 
-  console.log(filteredEvents);
+  // console.log(filteredEvents);
 
   useEffect(() => {
     const events = filteredEvents.filter(
       (event) =>
-        dayjs(event.date).format("DD-MM-YY") === date.format("DD-MM-YY")
+        dayjs(event.date || event.dateTime).format("DD-MM-YY") ===
+        date.format("DD-MM-YY")
     );
 
     setDateEvents(events);
