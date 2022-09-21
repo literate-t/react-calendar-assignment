@@ -1,10 +1,10 @@
-import { useContext } from "react";
-import { useNavigate } from "react-router-dom";
-import { getColorId, setGapiClient } from "../util";
-import GlobalContext from "../context/GlobalContext";
-import LibraryContext from "../context/LibraryContext";
+import { useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { getColorId, setGapiClient } from '../util';
+import GlobalContext from '../context/GlobalContext';
+import LibraryContext from '../context/LibraryContext';
 
-const SCOPES = "https://www.googleapis.com/auth/calendar";
+const SCOPES = 'https://www.googleapis.com/auth/calendar';
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -30,9 +30,9 @@ const Auth = () => {
   const handleAuth = () => {
     if (gapi.client.getToken() === null) {
       // tokenClient의 callback 함수가 호출됨
-      tokenClient.requestAccessToken({ prompt: "consent" });
+      tokenClient.requestAccessToken({ prompt: 'consent' });
     } else {
-      tokenClient.requestAccessToken({ prompt: "" });
+      tokenClient.requestAccessToken({ prompt: '' });
     }
   };
 
@@ -40,12 +40,12 @@ const Auth = () => {
     let response;
     try {
       const request = {
-        calendarId: "primary",
+        calendarId: 'primary',
         timeMin: new Date().toISOString(),
         showDeleted: false,
         singleEvents: true,
         maxResults: 10,
-        orderBy: "startTime",
+        orderBy: 'startTime',
       };
 
       response = await gapi.client.calendar.events.list(request);
@@ -57,7 +57,7 @@ const Auth = () => {
 
     const events = response.result.items.map((item) => ({
       summary: item.summary,
-      description: item.description ? item.description : "",
+      description: item.description ? item.description : '',
       colorId: item.colorId ? item.colorId : getColorId(),
       ...(item.start.date
         ? { date: item.start.date }
@@ -65,9 +65,11 @@ const Auth = () => {
       id: item.id,
     }));
 
-    dispatchCalenderEvents({ type: "init", payload: events });
+    console.log(events);
 
-    navigate("/calendar");
+    dispatchCalenderEvents({ type: 'init', payload: events });
+
+    navigate('/calendar');
   };
 
   return (

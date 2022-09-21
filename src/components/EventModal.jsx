@@ -1,6 +1,7 @@
-import { useContext, useState } from "react";
-import GlobalContext from "../context/GlobalContext";
-import LibraryContext from "../context/LibraryContext";
+import { useContext, useState } from 'react';
+import GlobalContext from '../context/GlobalContext';
+import LibraryContext from '../context/LibraryContext';
+import { useNavigate } from 'react-router-dom';
 import {
   getColor,
   getColorId,
@@ -9,7 +10,7 @@ import {
   SCOPE,
   setGapiClient,
   YYYYMMDDFormat,
-} from "../util";
+} from '../util';
 
 const EventModal = () => {
   const {
@@ -26,15 +27,15 @@ const EventModal = () => {
   google.accounts.oauth2.initTokenClient({
     client_id: process.env.REACT_APP_CLIENT_ID,
     scope: SCOPE,
-    callback: "",
+    callback: '',
   });
 
   const [summary, setSummary] = useState(
-    selectedEvent ? selectedEvent.summary : ""
+    selectedEvent ? selectedEvent.summary : ''
   );
 
   const [description, setDescription] = useState(
-    selectedEvent ? selectedEvent.description : ""
+    selectedEvent ? selectedEvent.description : ''
   );
 
   const [selectedLabel, setSelectedLabel] = useState(
@@ -45,11 +46,18 @@ const EventModal = () => {
       : labelColorClasses[0]
   );
 
+  const navigate = useNavigate();
+  const handleCode = (code) => {
+    if (code === 401) {
+      navigate('/');
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
 
     const event = {
-      summary,
+      summary: summary ? summary : '제목없음',
       description,
       colorId: getColorId(selectedLabel),
       ...(!selectedEvent
@@ -63,15 +71,15 @@ const EventModal = () => {
     if (selectedEvent) {
       gapi.client.calendar.events
         .patch({
-          calendarId: "primary",
+          calendarId: 'primary',
           eventId: event.id,
           resource: event,
         })
         .execute((result) => {
-          postRequest(result, () =>
-            dispatchCalenderEvents({ type: "update", payload: event })
+          postRequest(result, 'insert', () =>
+            dispatchCalenderEvents({ type: 'update', payload: event })
           );
-          console.log("patch", result);
+          handleCode(result.code);
         });
     } else {
       const insertEvent = {
@@ -86,21 +94,20 @@ const EventModal = () => {
 
       gapi.client.calendar.events
         .insert({
-          calendarId: "primary",
+          calendarId: 'primary',
           resource: insertEvent,
         })
         .execute((result) => {
-          postRequest(result, () => {
+          postRequest(result, 'insert', () =>
             dispatchCalenderEvents({
-              type: "push",
+              type: 'push',
               payload: {
                 ...event,
                 id: result.id,
               },
-            });
-
-            console.log("insert", event);
-          });
+            })
+          );
+          handleCode(result.code);
         });
     }
 
@@ -110,18 +117,17 @@ const EventModal = () => {
   const handleDelete = () => {
     gapi.client.calendar.events
       .delete({
-        calendarId: "primary",
+        calendarId: 'primary',
         eventId: selectedEvent.id,
       })
       .execute((result) => {
-        postRequest(result, () =>
+        postRequest(result, 'delete', () => {
           dispatchCalenderEvents({
-            type: "delete",
+            type: 'delete',
             payload: selectedEvent,
-          })
-        );
-
-        console.log("delete", result);
+          });
+        });
+        handleCode(result.code);
       });
 
     setShowEventModal(false);
@@ -165,7 +171,7 @@ const EventModal = () => {
             <span className="material-symbols-rounded text-gray-400">
               schedule
             </span>
-            <p>{daySelected.format("dddd, MMMM DD")}</p>
+            <p>{daySelected.format('dddd, MMMM DD')}</p>
             <span className="material-symbols-rounded text-gray-400">
               segment
             </span>
