@@ -1,10 +1,11 @@
 import dayjs from "dayjs";
 import { useContext, useEffect, useState } from "react";
 import GlobalContext from "../context/GlobalContext";
-import { getColor } from "../util";
+import { getColor, YYMMDDFormat } from "../util";
 
 const Date = ({ date }) => {
   const [dateEvents, setDateEvents] = useState([]);
+
   const {
     setDaySelected,
     setShowEventModal,
@@ -15,14 +16,15 @@ const Date = ({ date }) => {
   useEffect(() => {
     const events = filteredEvents.filter(
       (event) =>
-        dayjs(event.date || event.dateTime).format("DD-MM-YY") ===
-        date.format("DD-MM-YY")
+        dayjs(event.date || event.dateTime).format(YYMMDDFormat) ===
+        date.format(YYMMDDFormat)
     );
+
     setDateEvents(events);
   }, [filteredEvents, date]);
 
   const getTodayClass = () => {
-    return date.format("DD-MM-YY") === dayjs().format("DD-MM-YY")
+    return date.format(YYMMDDFormat) === dayjs().format(YYMMDDFormat)
       ? "bg-blue-600 text-white rounded-full w-7"
       : "";
   };

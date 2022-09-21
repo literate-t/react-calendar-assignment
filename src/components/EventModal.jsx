@@ -6,10 +6,10 @@ import {
   getColorId,
   labelColorClasses,
   postRequest,
+  SCOPE,
   setGapiClient,
+  YYYYMMDDFormat,
 } from "../util";
-
-const SCOPES = "https://www.googleapis.com/auth/calendar";
 
 const EventModal = () => {
   const {
@@ -25,7 +25,7 @@ const EventModal = () => {
 
   google.accounts.oauth2.initTokenClient({
     client_id: process.env.REACT_APP_CLIENT_ID,
-    scope: SCOPES,
+    scope: SCOPE,
     callback: "",
   });
 
@@ -53,7 +53,7 @@ const EventModal = () => {
       description,
       colorId: getColorId(selectedLabel),
       ...(!selectedEvent
-        ? { date: daySelected.format("YYYY-MM-DD") }
+        ? { date: daySelected.format(YYYYMMDDFormat) }
         : selectedEvent.date
         ? { date: selectedEvent.date }
         : { dateTime: selectedEvent.dateTime }),
@@ -68,14 +68,6 @@ const EventModal = () => {
           resource: event,
         })
         .execute((result) => {
-          // if (event.code === 400) {
-          //   alert("요청이 잘못됐어요");
-          // } else if (event.code === 401) {
-          //   alert("다시 로그인 해주세요");
-          // } else {
-          //   alert("이벤트 수정이 성공했어요");
-          //   dispatchCalenderEvents({ type: "update", payload: event });
-          // }
           postRequest(result, () =>
             dispatchCalenderEvents({ type: "update", payload: event })
           );
@@ -85,10 +77,10 @@ const EventModal = () => {
       const insertEvent = {
         ...event,
         end: {
-          date: daySelected.format("YYYY-MM-DD"),
+          date: daySelected.format(YYYYMMDDFormat),
         },
         start: {
-          date: daySelected.format("YYYY-MM-DD"),
+          date: daySelected.format(YYYYMMDDFormat),
         },
       };
 
@@ -98,19 +90,7 @@ const EventModal = () => {
           resource: insertEvent,
         })
         .execute((result) => {
-          // dispatchCalenderEvents({
-          //   type: "push",
-          //   payload: {
-          //     ...insertEvent,
-          //     id: event.id,
-          //   },
-          // });
           postRequest(result, () => {
-            // const newEvent = {
-            //   ...event
-            // }
-            console.log("insert", event);
-
             dispatchCalenderEvents({
               type: "push",
               payload: {
@@ -118,9 +98,9 @@ const EventModal = () => {
                 id: result.id,
               },
             });
-          });
 
-          //console.log("insert", result);
+            console.log("insert", event);
+          });
         });
     }
 
@@ -128,11 +108,6 @@ const EventModal = () => {
   };
 
   const handleDelete = () => {
-    // dispatchCalenderEvents({
-    //   type: "delete",
-    //   payload: selectedEvent,
-    // });
-
     gapi.client.calendar.events
       .delete({
         calendarId: "primary",

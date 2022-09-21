@@ -1,21 +1,8 @@
 import dayjs from "dayjs";
 
-export const getMonth = (month = dayjs().month()) => {
-  month = Math.floor(month);
-  const year = dayjs().year();
-  const firstDayOfTheMonth = dayjs(new Date(year, month, 1)).day();
-  let dayCount = 0 - firstDayOfTheMonth;
+export const SCOPE = "https://www.googleapis.com/auth/calendar";
 
-  const datesMatrix = new Array(5).fill([]).map(() => {
-    return new Array(7).fill(null).map(() => {
-      dayCount++;
-      return dayjs(new Date(year, month, dayCount));
-    });
-  });
-
-  return datesMatrix;
-};
-
+// 주간 설정
 export const getWeek = (date = dayjs().date()) => {
   const year = dayjs().year();
   const month = dayjs().month();
@@ -29,6 +16,10 @@ export const getWeek = (date = dayjs().date()) => {
   return week;
 };
 
+export const YYMMDDFormat = "YY-MM-DD";
+export const YYYYMMDDFormat = "YYYY-MM-DD";
+
+// 색상 설정 관련
 const labelColorPalette = {
   1: "lavender",
   2: "sage",
@@ -63,6 +54,7 @@ export const labelColorClasses = [
   "tomato",
 ];
 
+// 라이브러리 초기화
 const intializeGapiClient = async (gadpi) => {
   await gadpi.client.init({
     apiKey: process.env.REACT_APP_API_KEY,
@@ -74,9 +66,10 @@ export const setGapiClient = (gapi) => {
   gapi.load("client", async () => intializeGapiClient(gapi));
 };
 
+// 요청 후 처리
 export const postRequest = (event, fn) => {
   if (event.code === 400) {
-    alert("요청이 잘못됐어요");
+    alert("요청이 잘못됐네요");
   } else if (event.code === 401) {
     alert("다시 로그인 해주세요");
   } else {

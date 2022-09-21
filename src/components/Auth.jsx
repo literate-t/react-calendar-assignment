@@ -7,26 +7,14 @@ import LibraryContext from "../context/LibraryContext";
 const SCOPES = "https://www.googleapis.com/auth/calendar";
 
 const Auth = () => {
-  // const [apiLoading, apiError] = useScript("https://apis.google.com/js/api.js");
-  // const [gsiLoading, gsiError] = useScript(
-  //   "https://accounts.google.com/gsi/client"
-  // );
-
   const navigate = useNavigate();
 
   const { dispatchCalenderEvents } = useContext(GlobalContext);
+
   const { gapi, google } = useContext(LibraryContext);
 
-  // const intializeGapiClient = async () => {
-  //   await gapi.client.init({
-  //     apiKey: process.env.REACT_APP_API_KEY,
-  //     discoveryDocs: [process.env.REACT_APP_DISCOVERY_DOC],
-  //   });
-  // };
-
+  // 라이브러리 초기화
   setGapiClient(gapi);
-
-  // gapi.load("client", () => intializeGapiClient(gapi));
 
   const tokenClient = google.accounts.oauth2.initTokenClient({
     client_id: process.env.REACT_APP_CLIENT_ID,
@@ -41,7 +29,7 @@ const Auth = () => {
 
   const handleAuth = () => {
     if (gapi.client.getToken() === null) {
-      // 이 과정에서 tokenClient의 callback 함수가 호출됨
+      // tokenClient의 callback 함수가 호출됨
       tokenClient.requestAccessToken({ prompt: "consent" });
     } else {
       tokenClient.requestAccessToken({ prompt: "" });
@@ -59,6 +47,7 @@ const Auth = () => {
         maxResults: 10,
         orderBy: "startTime",
       };
+
       response = await gapi.client.calendar.events.list(request);
     } catch (err) {
       console.err(err);
@@ -79,22 +68,6 @@ const Auth = () => {
     dispatchCalenderEvents({ type: "init", payload: events });
 
     navigate("/calendar");
-
-    // navigate("/calendar", { state: events });
-    // if (!events || events.length === 0) {
-    //   setOutput("No events found.");
-    //   return;
-    // }
-
-    // const result = events.reduce(
-    //   (str, event) =>
-    //     `${str}${event.summary} (${
-    //       event.start.dateTime || event.start.date
-    //     } - ${event.end.dateTime || event.end.date})\n`,
-    //   "Events:\n"
-    // );
-
-    // setOutput(result);
   };
 
   return (
